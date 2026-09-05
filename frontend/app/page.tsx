@@ -131,35 +131,19 @@ export default function Home() {
         <button
           onClick={connect}
           disabled={status === "connected" || status.startsWith("connecting")}
-          style={{
-            padding: "12px 32px",
-            background: "transparent",
-            border: "1px solid #7fb98a",
-            color: "#7fb98a",
-            cursor: "pointer",
-            fontSize: 14,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase" as const,
-          }}
+          className="animated-button"
         >
-          Connect
+          <span className="label">Connect</span>
+          <span className="ripple" />
         </button>
 
         <button
           onClick={disconnect}
           disabled={status !== "connected"}
-          style={{
-            padding: "12px 32px",
-            background: "transparent",
-            border: "1px solid rgba(232,228,218,0.3)",
-            color: "rgba(232,228,218,0.5)",
-            cursor: "pointer",
-            fontSize: 14,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase" as const,
-          }}
+          className="animated-button"
         >
-          Disconnect
+          <span className="label">Disconnect</span>
+          <span className="ripple" />
         </button>
       </div>
     </div>
