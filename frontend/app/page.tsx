@@ -2,20 +2,20 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Room, RoomEvent, Track } from "livekit-client";
+import { SiriWave } from "@/components/SiriWave";
 
 export default function Home() {
   const roomRef = useRef<Room | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [status, setStatus] = useState("idle");
+  const [status, setStatus] = useState<string>("idle");
   const [agentSpeaking, setAgentSpeaking] = useState(false);
+  const [orbVisible, setOrbVisible] = useState(false);
 
   useEffect(() => {
     const room = roomRef.current;
     if (!room) return;
 
-    const onTrackSub = (
-      track: import("livekit-client").Track,
-    ) => {
+    const onTrackSub = (track: import("livekit-client").Track) => {
       if (track.kind === Track.Kind.Audio && audioRef.current) {
         track.attach(audioRef.current);
       }
@@ -35,6 +35,14 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    if (status === "connected") {
+      const timer = setTimeout(() => setOrbVisible(true), 200);
+      return () => clearTimeout(timer);
+    }
+    setOrbVisible(false);
+  }, [status]);
+
   const connect = useCallback(async () => {
     setStatus("requesting mic...");
     try {
@@ -53,7 +61,6 @@ export default function Home() {
       await room.connect(serverUrl, participantToken);
       await room.localParticipant.setMicrophoneEnabled(true);
 
-      // attach any tracks already published before we connected
       room.remoteParticipants.forEach((p) => {
         p.getTrackPublications().forEach((pub) => {
           if (pub.track && pub.kind === Track.Kind.Audio && audioRef.current) {
@@ -108,20 +115,18 @@ export default function Home() {
 
       <div
         style={{
-          width: 120,
-          height: 120,
-          borderRadius: "50%",
-          background: agentSpeaking
-            ? "radial-gradient(circle, #fff 0%, #a0dcb4 40%, transparent 70%)"
-            : status === "connected"
-            ? "radial-gradient(circle, #7fb98a 0%, rgba(127,185,138,0.3) 40%, transparent 70%)"
-            : "radial-gradient(circle, rgba(127,185,138,0.2) 0%, transparent 60%)",
-          transition: "all 0.3s",
-          boxShadow: agentSpeaking
-            ? "0 0 60px rgba(255,255,255,0.3)"
-            : "0 0 40px rgba(127,185,138,0.15)",
+          width: 180,
+          height: 180,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          opacity: orbVisible ? 1 : 0,
+          transform: orbVisible ? "scale(1)" : "scale(0.85)",
+          transition: "opacity 0.6s ease, transform 0.6s ease",
         }}
-      />
+      >
+        <SiriWave variant="fluid-dots" size={180} />
+      </div>
 
       <p style={{ color: "rgba(232,228,218,0.5)", fontSize: 14 }}>
         {status}
